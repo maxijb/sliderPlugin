@@ -1,5 +1,7 @@
 /* sliderPlugin by Maximiliano Benedetto
 
+https://github.com/maxijb/sliderPlugin
+
 To start using this plugin you need the following markup:
 
    <div id='sliderParent'>
