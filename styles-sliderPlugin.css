@@ -1,0 +1,9 @@
+@charset "utf-8";
+/* CSS Document */
+#markContainer {position:absolute; right:10px; top:10px; background: #fff;  z-index:100; padding: 0; }
+#markContainer .mark { width:15px; height:15px;  background: 1px #bbb solid; cursor:pointer; margin: 10px }
+#markContainer .mark { background-color:#0033CC;}
+
+div#next {background:#0033CC; right: 0; top:50%; width:25px; height:35px; position:absolute }
+div#prev {background:#0033CC; left: 0; top:50%; width:25px; height:35px; position:absolute }
+
