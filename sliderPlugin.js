@@ -145,7 +145,7 @@ var methods = {
 				}
 				
 				if (settings.fadeContent)  //if we need to fade content
-					$this.find("li:not(:first)").find(settings.fadeContent).hide();
+					$this.find("li:gt(0)").find(settings.fadeContent).hide();
 			
 				
 			}
@@ -252,7 +252,7 @@ var methods = {
     } else if ( typeof method === 'object' || ! method ) {
       return methods.init.apply( this, arguments );
     } else {
-      $.error( 'Method ' +  method + ' does not exist on jQuery.tooltip' );
+      $.error( 'Method ' +  method + ' does not exist on jQuery.sliderPlugin' );
     }    
   
   };
