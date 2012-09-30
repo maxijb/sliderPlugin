@@ -2,6 +2,8 @@
 
 https://github.com/maxijb/sliderPlugin
 
+INSTRUCTIONS:
+
 To start using this plugin you need the following HTML markup:
 
    <div id='sliderParent'>
