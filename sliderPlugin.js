@@ -61,6 +61,7 @@ There is a CSS file, with very basci configuration for styling buttons and marke
 
 
 */
+
 (function( $ ){
 
 
@@ -76,61 +77,68 @@ var defaultOptions = {  paginated : 1,
 						delay : 3000,
 						speed : 600,
 						adaptSize : false,
-						fadeContent : null
+						adaptParentToChildSize : false,
+						fadeContent : '', 
+						item : 'li',
+						list : 'ul',
+						originX : 0,
+						originY : 0
 					};
 						
 
 var methods = {
 	
 	init : function(ops) {
-	
-		
+		//donde, deacuantos, continuo, vertical, circulos) {
 		var settings = $.extend({}, defaultOptions, ops || {}); //settiings
 		
 		return this.each(function() {
-			$this = $(this);  
+			var $this = $(this);
 			settings.actual = 0;
-			$this.data('settings', settings); //we store the setting in the object
+			$this.data('settings', settings); 
 			
-			//number of slides 
-			settings.size = Math.ceil($this.find("li").length / settings.paginated); 
+			settings.size = Math.ceil($this.find(settings.item).length / settings.paginated);
 			settings.width = $this.width();
 			settings.height = $this.height();
 			
-			//do the styling
 			if ($this.css('position') == 'static') $this.css('position', 'relative');
-			$this.css({"textAlign": "left", "overflow": "hidden"})
-				.find("ul").css({position: "absolute", 'margin': 0, padding : 0, listStyle : 'none'}).width(settings.width * settings.size)
+			$this.css({"textAlign": "left", "overflow": "hidden"});
+			var $ul = $(settings.list + ":first", $this);
+				$ul.css({position: "absolute", 'margin': 0, padding : 0});
 			
-			//if adapts the size of the lis and uls after a window resize 
+			if (!settings.vertical)	$ul.width(settings.width * settings.size);
+			else $ul.height(settings.height * settings.size);
+			
 			if (settings.adaptSize)	{
-				$this.find('li').width(settings.width).css({'margin': 0, padding : 0, overflow : 'hidden'}).height(settings.height);  //sets li to fill parent
+				$this.find(settings.item).width(settings.width).css({'margin': 0, padding : 0, overflow : 'hidden'}).height(settings.height);  //pone ancho al ul
 				$(window).resize(function() {
 					methods.resize.apply($this);
 				});
 			}
+
+			if (settings.adaptParentToChildSize) {
+				var he = $this.find(settings.item+":first").height();
+				$(this).css({height: he});
+			}
 			
-			//is is vertical?
-			if (!settings.vertical) $this.find("li").css({"float":"left"});
+			if (!settings.vertical) $this.find(settings.item).css({"float":"left"});
 					
 			if (settings.size > 1) 
 			{	
 				if (settings.continuous) 
 					settings.interval = setInterval(
 						function(){
-							$this.slider('callSlide', -10); //call the function that swings the elements. -10 indicates it's a interval call 
+							$this.slider('callSlide', -10);
 							}
-						, settings.delay); //the default delay
-				
+						, settings.delay);
+					//settings.interval = setInterval("callSlide(-10)", 7000);
 					
-				
-				if (settings.addButtons)  //adds buttons if you want
+				if (settings.addButtons) 
 					$this.append("<div id='"+settings.next+"'></div><div id='"+settings.prev+"'></div>");
+				$this.find('#'+settings.next).bind("click", function() { methods.walkSlider.apply($this, [1]); }); //pone listeners
+				$this.find('#'+settings.prev).bind("click", function() { methods.walkSlider.apply($this, [-1]); }); //pone listeners
 				
-				$this.find(settings.next).bind("click", function() { methods.walkSlider.apply($this, [1]); }); //sets listeners
-				$this.find(settings.prev).bind("click", function() { methods.walkSlider.apply($this, [-1]); }); //sets listeners
-				
-				if (settings.markers) {// if we want markers
+				if (settings.markers) {// si hay que poner ciruclitos {
 		
 					
 					var poner = "";
@@ -144,21 +152,21 @@ var methods = {
 					}).filter(":first").addClass("activo");
 				}
 				
-				if (settings.fadeContent)  //if we need to fade content
-					$this.find("li:gt(0)").find(settings.fadeContent).hide();
+				if (settings.fadeContent != '') 
+					$this.find(settings.item+":gt(0)").find(settings.fadeContent).hide();
 			
 				
 			}
-			else { //if there is only one slide removes next and prev elemtents 
+			else {
 				$this.find('#'+settings.prevId+' , #'+settings.nextId).remove();
 			}
 		}); //each
-		
+		console.log(settings);
 	
 },
 
 		resize : function() {
-			//after a resize (if enabled) we adapt width and height of thee ul and lis
+			
 			var w = this.width();
 			var h = this.height();
 			var settings = this.data('settings');
@@ -178,8 +186,8 @@ var methods = {
 				ull = w*settings.actual;
 			}
 			
-			this.find('ul').css({width : ulw+'px', height: ulh+'px', top: -ult+'px', left : -ull + 'px'})
-				.find('li').width(w).height(h);	
+			this.find(settings.list+':first').css({width : ulw+'px', height: ulh+'px', top: -ult+'px', left : -ull + 'px'})
+				.find(settings.item).width(w).height(h);	
 		},
 
 
@@ -190,51 +198,57 @@ var methods = {
 				
 				slideviejo = settings.actual;
 				
-				if (num == -10) settings.actual++; // -10 is the interval
+				if (num == -10) settings.actual++; // -10 es el interval
 				else { settings.actual = num;  
 					   clearInterval(settings.interval);
 					  }
 				
 				
-				if (settings.actual >= settings.size) { settings.actual = 0;  } //if over last goes back to first
-				else if (settings.actual < 0) settings.actual = settings.size - 1; //if under 0 goes to the last
+				if (settings.actual >= settings.size) { settings.actual = 0;  } //si pasa del ultimo vuielve al primero
+				else if (settings.actual < 0) settings.actual = settings.size - 1; //si pasa del plrimero vuelve al ultimo
 			
 				if (settings.actual < 0) settings.actual = 0; 
 				
-				if (settings.actual != slideviejo) //it it's changed
+				if (settings.actual != slideviejo) //si ha cambiado
 				{
 					if (settings.vertical) {
-						var top = -settings.height * settings.actual;
-						$this.find("ul").animate({top: top}, settings.speed);
+						var top = -settings.height * settings.actual + settings.originY;
+						$this.find(settings.list+":first").animate({top: top}, settings.speed);
 					}
 					else {
-						var left = -settings.width * settings.actual;
-						$this.find("ul").animate({left: left}, settings.speed);
+						var left = -settings.width * settings.actual + settings.originX;
+						$this.find(settings.list+":first").animate({left: left}, settings.speed);
+						if (settings.adaptParentToChildSize) {
+							var he = $this.find(settings.item+":eq("+settings.actual+")").height();
+							$(this).animate({height: he}, 400);
+						}
 					}
 			
-					if (settings.markers) //if there are markes
+					if (settings.markers) //si hay marcadores
 						$this.find("div#"+settings.markerContainerId+" div#"+settings.markerClass+settings.actual)
 							.addClass("activo").siblings().removeClass("activo");
 					
-					if (settings.fadeContent)  { //if we have to fade anything
-						$this.find("li:eq("+settings.actual+")").find(settings.fadeContent).fadeIn(400);
-						$this.find("li:eq("+slideviejo+")").find(settings.fadeContent).fadeOut(400);
+					if (settings.fadeContent)  { //si hay que hacer fade con algo del contenido
+						$this.find(settings.item+":eq("+settings.actual+")").find(settings.fadeContent).fadeIn(400);
+						$this.find(settings.item+":eq("+slideviejo+")").find(settings.fadeContent).fadeOut(400);
 					}
 				}
 			});
 		},
 		
 		 walkSlider: function(masomenos) {
-			return this.each(function() { //goes next or prev slide
+		 	console.log(this);
+			return this.each(function() {
 				var $this = $(this);
 				var settings = $this.data('settings'); 
 				clearInterval(settings.interval);
-				methods.callSlide.appy($this, [(settings.actual + masomenos)]);
+				console.log('llama');
+				methods.callSlide.apply($this, [(settings.actual + masomenos)]);
 			});
 		},
 		
 		
-		stopSlider : function () { //stops interval
+		stopSlider : function () {
 			return this.each(function() {
 				var $this = $(this);
 				var settings = $this.data('settings'); 
@@ -252,7 +266,7 @@ var methods = {
     } else if ( typeof method === 'object' || ! method ) {
       return methods.init.apply( this, arguments );
     } else {
-      $.error( 'Method ' +  method + ' does not exist on jQuery.sliderPlugin' );
+      $.error( 'Method ' +  method + ' does not exist on jQuery.tooltip' );
     }    
   
   };
